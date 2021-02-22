@@ -1,4 +1,4 @@
-package org.javawebstack.scheduler;
+package org.javawebstack.scheduler.job;
 
 import java.util.UUID;
 

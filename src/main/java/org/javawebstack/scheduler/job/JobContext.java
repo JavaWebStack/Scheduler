@@ -1,6 +1,6 @@
-package org.javawebstack.scheduler;
+package org.javawebstack.scheduler.job;
 
-import com.sun.corba.se.impl.io.TypeMismatchException;
+import com.google.gson.JsonParseException;
 import org.javawebstack.abstractdata.AbstractMapper;
 import org.javawebstack.abstractdata.AbstractObject;
 
@@ -14,6 +14,7 @@ public class JobContext {
     private long availableAt;
     private int attempts;
     private int maxAttempts;
+    private String error;
     private String type;
     private AbstractObject data;
 
@@ -49,16 +50,40 @@ public class JobContext {
         this.maxAttempts = maxAttempts;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public AbstractObject getData() {
+        return data;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setData(AbstractObject data) {
+        this.data = data;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public void setJob(Job job) {
         this.type = job.getClass().getName();
         this.data = mapper.toAbstract(job).object();
     }
 
-    public Job getJob() throws ClassNotFoundException, TypeMismatchException {
+    public Job getJob() throws ClassNotFoundException, JsonParseException {
         Class<?> clazz = Class.forName(type);
         if(clazz.isAssignableFrom(Job.class))
-            throw new TypeMismatchException("The job's type is not a Job class");
+            throw new JsonParseException("The job's type is not a Job class");
         return mapper.fromAbstract(data, (Class<? extends Job>) clazz);
+    }
+
+    public void setError(String error) {
+        this.error = error;
     }
 
 }

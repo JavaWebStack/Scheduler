@@ -1,7 +1,9 @@
-package org.javawebstack.scheduler;
+package org.javawebstack.scheduler.job.redis;
 
 import org.javawebstack.abstractdata.AbstractElement;
 import org.javawebstack.abstractdata.AbstractMapper;
+import org.javawebstack.scheduler.job.JobContext;
+import org.javawebstack.scheduler.job.JobQueue;
 import redis.clients.jedis.Jedis;
 
 public class RedisJobQueue implements JobQueue {

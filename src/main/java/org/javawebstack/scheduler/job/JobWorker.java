@@ -1,4 +1,7 @@
-package org.javawebstack.scheduler;
+package org.javawebstack.scheduler.job;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class JobWorker implements Runnable {
 
@@ -22,10 +25,13 @@ public class JobWorker implements Runnable {
             }
             try {
                 Job job = context.getJob();
-                JobResult result = null;
+                JobResult result;
                 try {
                     result = job.perform(context);
                 } catch (Throwable t) {
+                    StringWriter writer = new StringWriter();
+                    t.printStackTrace(new PrintWriter(writer));
+                    context.setError(writer.toString());
                     result = JobResult.retry();
                 }
                 context.setAttempts(context.getAttempts() + 1);
@@ -42,9 +48,10 @@ public class JobWorker implements Runnable {
                         }catch (Throwable t) {
                             t.printStackTrace();
                         }
+                    } else {
+                        context.setAvailableAt(result.getRetryAt().getTime());
+                        queue.schedule(context);
                     }
-                    context.setAvailableAt(result.getRetryAt().getTime());
-                    queue.schedule(context);
                 }
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
