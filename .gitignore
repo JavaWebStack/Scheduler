@@ -1,0 +1,6 @@
+*.iml
+.idea
+target
+
+# IntelliJ Linux bug
+.fuse_*
