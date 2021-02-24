@@ -1,66 +1,58 @@
 package org.javawebstack.scheduler.job;
 
+import com.google.gson.JsonParseException;
+import org.javawebstack.scheduler.Work;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-public class JobWorker implements Runnable {
+public class JobWorker extends Work {
 
     private final JobQueue queue;
-    private boolean stopRequested = false;
 
     public JobWorker(JobQueue queue) {
         this.queue = queue;
     }
 
-    public void run() {
-        while(!stopRequested) {
-            JobContext context = queue.pop(System.currentTimeMillis());
-            if(context == null) {
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                continue;
-            }
+    public boolean runOnce() {
+        JobContext context = queue.next(System.currentTimeMillis());
+        if(context == null)
+            return false;
+        try {
+            Job job = context.getJob();
+            JobResult result;
             try {
-                Job job = context.getJob();
-                JobResult result;
+                result = job.perform(context);
+            } catch (Throwable t) {
+                StringWriter writer = new StringWriter();
+                t.printStackTrace(new PrintWriter(writer));
+                context.setError(writer.toString());
+                result = JobResult.retry();
+            }
+            context.setAttempts(context.getAttempts() + 1);
+            if(result.isSuccess()) {
                 try {
-                    result = job.perform(context);
-                } catch (Throwable t) {
-                    StringWriter writer = new StringWriter();
-                    t.printStackTrace(new PrintWriter(writer));
-                    context.setError(writer.toString());
-                    result = JobResult.retry();
+                    job.onSuccess(context);
+                }catch (Throwable t) {
+                    t.printStackTrace();
                 }
-                context.setAttempts(context.getAttempts() + 1);
-                if(result.isSuccess()) {
+            } else {
+                if(result.getRetryAt() == null || context.getAttempts() >= context.getMaxAttempts()) {
                     try {
-                        job.onSuccess(context);
+                        job.onFailure(context);
                     }catch (Throwable t) {
                         t.printStackTrace();
                     }
                 } else {
-                    if(result.getRetryAt() == null || context.getAttempts() >= context.getMaxAttempts()) {
-                        try {
-                            job.onFailure(context);
-                        }catch (Throwable t) {
-                            t.printStackTrace();
-                        }
-                    } else {
-                        context.setAvailableAt(result.getRetryAt().getTime());
-                        queue.schedule(context);
-                    }
+                    context.setAvailableAt(result.getRetryAt().getTime());
+                    context.setJob(job);
+                    queue.dispatch(context);
                 }
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
             }
+        } catch (ClassNotFoundException | JsonParseException e) {
+            e.printStackTrace();
         }
-    }
-
-    public void shutdown() {
-        stopRequested = true;
+        return true;
     }
 
 }

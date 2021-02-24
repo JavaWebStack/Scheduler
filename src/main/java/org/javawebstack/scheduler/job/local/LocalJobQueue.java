@@ -10,11 +10,11 @@ public class LocalJobQueue implements JobQueue {
 
     private final SortedSet<JobContext> jobs = new ConcurrentSkipListSet<>((o1, o2) -> (int)((o1.getAvailableAt() - o2.getAvailableAt()) / 1000));
 
-    public void schedule(JobContext job) {
+    public void dispatch(JobContext job) {
         jobs.add(job);
     }
 
-    public synchronized JobContext pop(long time) {
+    public synchronized JobContext next(long time) {
         if(jobs.size() == 0)
             return null;
         JobContext context = jobs.first();

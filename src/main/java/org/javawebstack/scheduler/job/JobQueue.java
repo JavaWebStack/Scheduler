@@ -4,22 +4,22 @@ import java.util.UUID;
 
 public interface JobQueue {
 
-    void schedule(JobContext job);
-    default void schedule(Job job) {
-        schedule(job, 0L);
+    void dispatch(JobContext job);
+    default void dispatch(Job job) {
+        dispatch(job, 0L);
     }
-    default void schedule(Job job, long at) {
-        schedule(job, at, 1);
+    default void dispatch(Job job, long at) {
+        dispatch(job, at, 1);
     }
-    default void schedule(Job job, long at, int maxAttempts) {
+    default void dispatch(Job job, long at, int maxAttempts) {
         JobContext context = new JobContext();
         context.setMaxAttempts(1);
         context.setId(UUID.randomUUID());
         context.setAvailableAt(at);
         context.setMaxAttempts(maxAttempts);
         context.setJob(job);
-        schedule(context);
+        dispatch(context);
     }
-    JobContext pop(long time);
+    JobContext next(long time);
 
 }

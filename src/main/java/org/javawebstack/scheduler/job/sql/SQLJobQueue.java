@@ -24,7 +24,7 @@ public class SQLJobQueue implements JobQueue {
         this.name = name;
     }
 
-    public void schedule(JobContext job) {
+    public void dispatch(JobContext job) {
         SQLJobModel model = new SQLJobModel();
         model.setQueue(name);
         model.setId(job.getId());
@@ -37,7 +37,7 @@ public class SQLJobQueue implements JobQueue {
         model.save();
     }
 
-    public JobContext pop(long time) {
+    public JobContext next(long time) {
         SQLJobModel model = repo.where("queue", name).where("availableAt", "<=", time).order("availableAt").first();
         if(model == null)
             return null;

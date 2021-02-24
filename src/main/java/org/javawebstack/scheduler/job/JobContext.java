@@ -1,6 +1,7 @@
 package org.javawebstack.scheduler.job;
 
 import com.google.gson.JsonParseException;
+import org.javawebstack.abstractdata.AbstractElement;
 import org.javawebstack.abstractdata.AbstractMapper;
 import org.javawebstack.abstractdata.AbstractObject;
 
@@ -84,6 +85,14 @@ public class JobContext {
 
     public void setError(String error) {
         this.error = error;
+    }
+
+    public static JobContext fromString(String json) {
+        return mapper.fromAbstract(AbstractElement.fromJson(json), JobContext.class);
+    }
+
+    public String toString() {
+        return mapper.toAbstract(this).toJsonString();
     }
 
 }
