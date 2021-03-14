@@ -1,6 +1,7 @@
 package org.javawebstack.scheduler.job;
 
 import com.google.gson.JsonParseException;
+import org.javawebstack.injector.Injector;
 import org.javawebstack.scheduler.Work;
 
 import java.io.PrintWriter;
@@ -9,9 +10,15 @@ import java.io.StringWriter;
 public class JobWorker extends Work {
 
     private final JobQueue queue;
+    private Injector injector;
 
     public JobWorker(JobQueue queue) {
         this.queue = queue;
+    }
+
+    public JobWorker setInjector(Injector injector) {
+        this.injector = injector;
+        return this;
     }
 
     public boolean runOnce() {
@@ -20,6 +27,8 @@ public class JobWorker extends Work {
             return false;
         try {
             Job job = context.getJob();
+            if(injector != null)
+                injector.inject(job);
             JobResult result;
             try {
                 result = job.perform(context);
