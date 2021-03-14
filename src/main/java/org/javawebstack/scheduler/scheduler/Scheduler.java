@@ -1,5 +1,7 @@
 package org.javawebstack.scheduler.scheduler;
 
+import org.javawebstack.injector.Inject;
+import org.javawebstack.injector.Injector;
 import org.javawebstack.scheduler.Work;
 import org.javawebstack.scheduler.job.Job;
 import org.javawebstack.scheduler.job.JobContext;
@@ -33,20 +35,29 @@ public class Scheduler extends Work {
         public SchedulerJob() {
         }
 
+        @Inject
+        Injector injector;
+
         public SchedulerJob(SchedulerContext context) {
             this.context = context;
         }
 
+        private SchedulerTask inject(SchedulerTask task) {
+            if(injector != null)
+                injector.inject(task);
+            return task;
+        }
+
         public JobResult perform(JobContext jobContext) throws Exception {
-            return context.getTask().perform(jobContext);
+            return inject(context.getTask()).perform(jobContext);
         }
 
         public void onSuccess(JobContext jobContext) throws Exception {
-            context.getTask().onSuccess(jobContext);
+            inject(context.getTask()).onSuccess(jobContext);
         }
 
         public void onFailure(JobContext jobContext) throws Exception {
-            context.getTask().onFailure(jobContext);
+            inject(context.getTask()).onFailure(jobContext);
         }
 
     }
