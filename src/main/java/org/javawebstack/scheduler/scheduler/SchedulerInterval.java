@@ -2,16 +2,22 @@ package org.javawebstack.scheduler.scheduler;
 
 public class SchedulerInterval {
 
+    private long every;
+
+    public SchedulerInterval(long every) {
+        this.every = every;
+    }
+
     public SchedulerInterval(String source) {
-        // TODO
+        this(Long.parseLong(source));
     }
 
     public long next(long last) {
-        return last + 10000; // TODO
+        return last + every; // TODO
     }
 
     public String toString() {
-        return ""; // TODO
+        return String.valueOf(every); // TODO
     }
 
 }
