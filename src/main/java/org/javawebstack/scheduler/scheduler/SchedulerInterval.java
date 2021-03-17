@@ -2,7 +2,7 @@ package org.javawebstack.scheduler.scheduler;
 
 public class SchedulerInterval {
 
-    private long every;
+    private final long every;
 
     public SchedulerInterval(long every) {
         this.every = every;
