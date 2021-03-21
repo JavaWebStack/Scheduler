@@ -8,7 +8,7 @@ import org.javawebstack.orm.annotation.Table;
 @Table("scheduled_tasks")
 public class SQLScheduledTaskModel extends Model {
 
-    @Column(id = true)
+    @Column(id = true, size = 255)
     private String name;
     @Column
     private String schedule;
